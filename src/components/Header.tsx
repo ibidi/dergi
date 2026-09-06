@@ -64,7 +64,7 @@ export default function Header() {
           <span className="text-4xl font-black tracking-tight">İRTİBAT</span>
           <span className="text-[11px] font-semibold uppercase tracking-[0.35em] opacity-70">Dergi</span>
         </Link>
-        <nav className="hidden lg:flex items-center gap-6 text-[13px] font-semibold uppercase tracking-[0.14em]">
+        <nav className="hidden md:flex items-center gap-4 xl:gap-6 text-[12px] xl:text-[13px] font-semibold uppercase tracking-[0.14em]">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -139,24 +139,6 @@ export default function Header() {
         </nav>
       )}
 
-      {!overlay && (
-        <nav className="hidden md:block border-t">
-          <div className="mx-auto max-w-7xl px-4 flex items-center gap-8 h-12 text-sm font-semibold uppercase tracking-wider">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`transition ${isActive(item.href) ? "text-brand-500" : "hover:text-brand-500"}`}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link href="/iletisim" className="ml-auto text-neutral-500 hover:text-brand-500 normal-case tracking-normal font-semibold">
-              İletişim
-            </Link>
-          </div>
-        </nav>
-      )}
     </header>
   );
 }
