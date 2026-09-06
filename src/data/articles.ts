@@ -30,8 +30,7 @@ export const CATEGORIES: Category[] = [
   { slug: "kapak-konusu", name: "Kapak Konusu", description: "Ayın kapak yıldızı ve çekim hikâyesi" },
 ];
 
-const img = (seed: string, w = 800, h = 600) =>
-  `https://picsum.photos/seed/${seed}/${w}/${h}`;
+const img = (seed: string) => `/images/${seed}.jpg`;
 
 const body = (topic: string): string[] => [
   `${topic} — İrtibat tarzı bir dergi haberi nasıl yazılır, onun tadında bir giriş paragrafı. Şehrin temposu, stilin detayları ve merak edilen isimlerin dünyasına yakından bir bakış sunuyoruz.`,
@@ -49,7 +48,7 @@ export const ARTICLES: Article[] = [
     author: "İpek Sönmez",
     date: "5 Eylül 2026",
     readTime: 8,
-    image: img("irtibat-cover", 1600, 900),
+    image: img("irtibat-cover"),
     featured: true,
     content: body("Eylül kapağımız"),
   },
@@ -61,7 +60,7 @@ export const ARTICLES: Article[] = [
     author: "İrtibat Ekibi",
     date: "4 Eylül 2026",
     readTime: 6,
-    image: img("irtibat-derya", 1600, 900),
+    image: img("irtibat-derya"),
     featured: true,
     content: body("Derya Aksoy röportajı"),
   },
@@ -73,7 +72,7 @@ export const ARTICLES: Article[] = [
     author: "İrtibat Ekibi",
     date: "4 Eylül 2026",
     readTime: 5,
-    image: img("irtibat-kaan", 1600, 900),
+    image: img("irtibat-kaan"),
     featured: true,
     content: body("Kaan Yıldırım röportajı"),
   },
@@ -85,7 +84,7 @@ export const ARTICLES: Article[] = [
     author: "İrtibat Ekibi",
     date: "3 Eylül 2026",
     readTime: 6,
-    image: img("irtibat-chef", 800, 600),
+    image: img("irtibat-chef"),
     featured: true,
     content: body("Şefle buluşma"),
   },
@@ -264,7 +263,7 @@ export const ARTICLES: Article[] = [
     author: "İrtibat TV",
     date: "10 Ağustos 2026",
     readTime: 2,
-    image: img("irtibat-video1", 1100, 550),
+    image: img("irtibat-video1"),
     content: body("Video özel"),
   },
   {
@@ -275,7 +274,7 @@ export const ARTICLES: Article[] = [
     author: "İrtibat TV",
     date: "5 Ağustos 2026",
     readTime: 2,
-    image: img("irtibat-video2", 1100, 550),
+    image: img("irtibat-video2"),
     content: body("Video sohbet"),
   },
 ];
