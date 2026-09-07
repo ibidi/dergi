@@ -39,9 +39,13 @@ export default function ContactPage() {
         {sent && <p className="text-sm font-semibold text-green-700">Mesajınız alındı, teşekkürler!</p>}
       </form>
       <div className="mt-6 text-sm text-neutral-600 space-y-1">
-        <p><strong>Adres:</strong> Uğur Mumcu Cad. No:33, Çankaya – Ankara</p>
-        <p><strong>Telefon:</strong> 0312 428 0 444</p>
-        <p><strong>E-posta:</strong> info@irtibatdergi.com</p>
+        <p><strong>Yönetim Yeri:</strong> Afşin / KAHRAMANMARAŞ</p>
+        <p><strong>Web:</strong> www.irtibatdergi.com</p>
+        <p><strong>E-posta:</strong> irtibatdergi@gmail.com</p>
+        <p><strong>Instagram:</strong> <a className="underline" href="https://www.instagram.com/irtibatdergi" target="_blank" rel="noreferrer">@irtibatdergi</a></p>
+        <p><strong>X:</strong> <a className="underline" href="https://x.com/irtibatdergi" target="_blank" rel="noreferrer">@irtibatdergi</a></p>
+        <p><strong>TikTok:</strong> <a className="underline" href="https://www.tiktok.com/@irtibatdergi" target="_blank" rel="noreferrer">@irtibatdergi</a></p>
+        <p><strong>Facebook:</strong> <a className="underline" href="https://www.facebook.com/irtibatdergi" target="_blank" rel="noreferrer">irtibatdergi</a></p>
       </div>
     </div>
   );
