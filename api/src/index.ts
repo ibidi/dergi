@@ -453,6 +453,41 @@ app.delete("/api/media/:id", async (c) => {
   return c.json({ ok: true });
 });
 
+/* ---------- settings (menüler, iletişim, slider) ---------- */
+const SETTING_KEYS = ["header_menu", "footer_menu", "contact", "socials", "slider_config"] as const;
+
+async function allSettings(db: D1Database): Promise<Record<string, unknown>> {
+  const r = await db.prepare("SELECT key, value FROM settings").all<{ key: string; value: string }>();
+  const out: Record<string, unknown> = {};
+  for (const row of r.results) {
+    try {
+      out[row.key] = JSON.parse(row.value);
+    } catch {
+      out[row.key] = row.value;
+    }
+  }
+  return out;
+}
+
+app.get("/api/settings", async (c) => {
+  const err = await requireAuth(c);
+  if (err) return err;
+  return c.json({ settings: await allSettings(c.env.DB) });
+});
+
+app.put("/api/settings", async (c) => {
+  const err = await requireAuth(c);
+  if (err) return err;
+  const b = (await c.req.json().catch(() => ({}))) as { key?: unknown; value?: unknown };
+  if (typeof b.key !== "string" || !(SETTING_KEYS as readonly string[]).includes(b.key)) {
+    return c.json({ error: "Geçersiz ayar anahtarı" }, 400);
+  }
+  await c.env.DB.prepare(
+    "INSERT INTO settings (key, value, updated_at) VALUES (?,?,datetime('now')) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now')"
+  ).bind(b.key, JSON.stringify(b.value ?? null)).run();
+  return c.json({ ok: true });
+});
+
 /* ---------- public aggregate (site bu endpoint'i okur) ---------- */
 app.get("/api/public/content", async (c) => {
   const cats = await c.env.DB.prepare("SELECT slug, name, description, sort FROM categories ORDER BY sort, name").all();
@@ -464,7 +499,7 @@ app.get("/api/public/content", async (c) => {
   ).all<ArticleRow>();
   const slider = [];
   for (const row of sl.results) slider.push(await articleJson(c.env.DB, row));
-  return c.json({ categories: cats.results, articles, slider, updatedAt: new Date().toISOString() });
+  return c.json({ categories: cats.results, articles, slider, settings: await allSettings(c.env.DB), updatedAt: new Date().toISOString() });
 });
 
 export default app;

@@ -1,5 +1,5 @@
 // Admin paneli -> Worker API istemcisi (token localStorage'da tutulur).
-import { API_URL, type ArticleDTO, type Category } from "./content";
+import { API_URL, type ArticleDTO, type Category, type SiteSettings } from "./content";
 
 export type AdminUser = { id: number; email: string; name: string; role: "admin" | "editor" };
 export type MediaItem = { id: number; key: string; url: string; mime: string; size: number; created_at: string };
@@ -72,6 +72,10 @@ export const adminApi = {
   slider: () => req<{ slider: ArticleDTO[] }>("/api/slider"),
   saveSlider: (slugs: string[]) =>
     req<{ ok: boolean }>("/api/slider", { method: "PUT", body: JSON.stringify({ slugs }) }),
+
+  settings: () => req<{ settings: Partial<SiteSettings> }>("/api/settings"),
+  saveSetting: (key: string, value: unknown) =>
+    req<{ ok: boolean }>("/api/settings", { method: "PUT", body: JSON.stringify({ key, value }) }),
 
   media: () => req<{ media: MediaItem[] }>("/api/media"),
   uploadMedia: (file: File) => {

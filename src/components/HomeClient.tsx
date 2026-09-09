@@ -27,17 +27,20 @@ export default function HomeClient() {
   const data = useMemo(() => {
     if (!remote) return null;
     const list = remote.articles;
+    const max = remote.settings.slider_config.max;
     const inCat = (slug: string) => list.filter((a) => a.categories.includes(slug));
-    const hero =
+    const picked =
       remote.slider.length >= 3
-        ? remote.slider.slice(0, 5)
+        ? remote.slider.slice(0, max)
         : [
             bySlug(list, "heyecanli-tutkulu-merakli-selin-aras"),
             bySlug(list, "derya-aksoy"),
             bySlug(list, "kaan-yildirim"),
           ].filter((x): x is (typeof list)[number] => Boolean(x));
+    const hero = picked.length ? picked : list.slice(0, 3);
     return {
-      hero: hero.length ? hero : list.slice(0, 3),
+      hero,
+      interval: remote.settings.slider_config.interval,
       interviews: inCat("roportajlar").filter((a) => !hero.includes(a)).slice(0, 6),
       fashion: inCat("moda").slice(0, 4),
       invites: inCat("davetler").slice(0, 3),
@@ -77,6 +80,7 @@ export default function HomeClient() {
   return (
     <HomeView
       hero={data.hero}
+      interval={data.interval}
       interviews={data.interviews}
       fashion={data.fashion}
       invites={data.invites}
@@ -90,6 +94,7 @@ export default function HomeClient() {
 
 type HomeViewProps = {
   hero: Article[];
+  interval?: number;
   interviews: Article[];
   fashion: Article[];
   invites: Article[];
@@ -99,10 +104,10 @@ type HomeViewProps = {
   catName: (s: string) => string;
 };
 
-function HomeView({ hero, interviews, fashion, invites, videos, covers, trendingList, catName }: HomeViewProps) {
+function HomeView({ hero, interval, interviews, fashion, invites, videos, covers, trendingList, catName }: HomeViewProps) {
   return (
     <>
-      <HeroSlider slides={hero} />
+      <HeroSlider slides={hero} interval={interval} />
       <div className="mx-auto max-w-7xl px-4">
         <section className="mt-14">
           <SectionHeading title="Röportajlar" href="/roportajlar" />

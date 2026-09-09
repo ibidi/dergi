@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { adminApi, errMsg, getToken, setToken, type AdminUser } from "@/lib/admin-api";
-import { API_URL, type ArticleDTO, type Category } from "@/lib/content";
+import { API_URL, DEFAULT_SETTINGS, type ArticleDTO, type Category, type Contact, type MenuLink, type SliderConfig } from "@/lib/content";
 
-type Tab = "yazilar" | "slider" | "kategoriler" | "medya" | "kullanicilar";
+type Tab = "yazilar" | "slider" | "kategoriler" | "medya" | "menuler" | "kullanicilar";
 
 const input =
   "w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-black";
@@ -57,7 +57,7 @@ export default function AdminPage() {
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
           <p className="text-xl font-black tracking-tight">İRTİBAT <span className="text-xs font-semibold tracking-[0.3em] text-neutral-400">ADMIN</span></p>
           <nav className="ml-6 flex flex-wrap gap-1 text-sm font-bold">
-            {([["yazilar", "Yazılar"], ["slider", "Slider"], ["kategoriler", "Kategoriler"], ["medya", "Medya"], ["kullanicilar", "Kullanıcılar"]] as [Tab, string][]).map(([t, l]) => (
+            {([["yazilar", "Yazılar"], ["slider", "Slider"], ["kategoriler", "Kategoriler"], ["medya", "Medya"], ["menuler", "Menüler"], ["kullanicilar", "Kullanıcılar"]] as [Tab, string][]).map(([t, l]) => (
               <button key={t} onClick={() => setTab(t)} className={`rounded-full px-4 py-1.5 ${tab === t ? "bg-neutral-950 text-white" : "hover:bg-neutral-200"}`}>{l}</button>
             ))}
           </nav>
@@ -73,6 +73,7 @@ export default function AdminPage() {
         {tab === "slider" && <Slider onErr={setErr} />}
         {tab === "kategoriler" && <Categories onErr={setErr} isAdmin={user.role === "admin"} />}
         {tab === "medya" && <Media onErr={setErr} />}
+        {tab === "menuler" && <Menus onErr={setErr} />}
         {tab === "kullanicilar" && <Users onErr={setErr} me={user} />}
       </main>
     </div>
@@ -551,6 +552,113 @@ function Media({ onErr }: { onErr: (s: string) => void }) {
         ))}
       </div>
       {list.length === 0 && <p className="mt-3 text-sm text-neutral-500">Henüz görsel yok.</p>}
+    </div>
+  );
+}
+
+/* ================= MENÜLER & AYARLAR ================= */
+function Menus({ onErr }: { onErr: (s: string) => void }) {
+  const [header, setHeader] = useState<MenuLink[]>(DEFAULT_SETTINGS.header_menu);
+  const [footer, setFooter] = useState<MenuLink[]>(DEFAULT_SETTINGS.footer_menu);
+  const [socials, setSocials] = useState<MenuLink[]>(DEFAULT_SETTINGS.socials);
+  const [contact, setContact] = useState<Contact>(DEFAULT_SETTINGS.contact);
+  const [slider, setSlider] = useState<SliderConfig>(DEFAULT_SETTINGS.slider_config);
+  const [saved, setSaved] = useState("");
+
+  useEffect(() => {
+    let live = true;
+    adminApi
+      .settings()
+      .then((d) => {
+        if (!live) return;
+        const s = d.settings;
+        if (Array.isArray(s.header_menu) && s.header_menu.length) setHeader(s.header_menu);
+        if (Array.isArray(s.footer_menu) && s.footer_menu.length) setFooter(s.footer_menu);
+        if (Array.isArray(s.socials) && s.socials.length) setSocials(s.socials);
+        if (s.contact) setContact({ ...DEFAULT_SETTINGS.contact, ...s.contact });
+        if (s.slider_config) setSlider({ ...DEFAULT_SETTINGS.slider_config, ...s.slider_config });
+      })
+      .catch((e: unknown) => {
+        if (live) onErr(errMsg(e));
+      });
+    return () => {
+      live = false;
+    };
+  }, [onErr]);
+
+  const save = (key: string, value: unknown, msg: string) => {
+    adminApi
+      .saveSetting(key, value)
+      .then(() => {
+        onErr("");
+        setSaved(msg);
+        setTimeout(() => setSaved(""), 2500);
+      })
+      .catch((e: unknown) => onErr(errMsg(e)));
+  };
+
+  return (
+    <div className="grid gap-4">
+      {saved && <p className="rounded-xl border border-green-300 bg-green-50 px-4 py-2 text-sm">✅ {saved}</p>}
+      <LinkList title="Üst menü (Header)" desc="Sitenin en üstündeki menü. Sıralamayı oklarla değiştirin." links={header} setLinks={setHeader} onSave={() => save("header_menu", header, "Üst menü kaydedildi.")} />
+      <LinkList title="Alt menü — Kurumsal (Footer)" desc="Sayfa altındaki Kurumsal sütunu." links={footer} setLinks={setFooter} onSave={() => save("footer_menu", footer, "Alt menü kaydedildi.")} />
+      <LinkList title="Sosyal medya (Footer)" desc="Simge etikete göre seçilir: Instagram, X, TikTok, Facebook. Başka bir ad yazarsanız genel bağlantı simgesi çıkar." links={socials} setLinks={setSocials} onSave={() => save("socials", socials, "Sosyal medya kaydedildi.")} />
+
+      <div className="rounded-3xl bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-black">İletişim bilgileri (Footer)</h2>
+        <div className="mt-4 grid gap-3 max-w-xl">
+          <div><p className={label}>Adres</p><input className={input} value={contact.address} onChange={(e) => setContact({ ...contact, address: e.target.value })} /></div>
+          <div><p className={label}>Site</p><input className={input} value={contact.site} onChange={(e) => setContact({ ...contact, site: e.target.value })} /></div>
+          <div><p className={label}>E-posta</p><input className={input} value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} /></div>
+          <div><button className={btn} onClick={() => save("contact", contact, "İletişim bilgileri kaydedildi.")}>Kaydet</button></div>
+        </div>
+      </div>
+
+      <div className="rounded-3xl bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-black">Slider davranışı</h2>
+        <div className="mt-4 flex flex-wrap items-end gap-3">
+          <div><p className={label}>Geçiş süresi (saniye)</p><input className={`${input} max-w-32`} type="number" min={3} max={20} value={Math.round(slider.interval / 1000)} onChange={(e) => setSlider({ ...slider, interval: Math.max(3, Math.min(20, Number(e.target.value) || 6)) * 1000 })} /></div>
+          <div><p className={label}>Slayt sayısı (en fazla)</p><input className={`${input} max-w-32`} type="number" min={1} max={10} value={slider.max} onChange={(e) => setSlider({ ...slider, max: Math.max(1, Math.min(10, Number(e.target.value) || 5)) })} /></div>
+          <div><button className={btn} onClick={() => save("slider_config", slider, "Slider ayarları kaydedildi.")}>Kaydet</button></div>
+        </div>
+        <p className="mt-2 text-xs text-neutral-500">Hangi yazıların çıkacağı Slider sekmesinden seçilir; burası sadece hız ve adet.</p>
+      </div>
+    </div>
+  );
+}
+
+function LinkList({ title, desc, links, setLinks, onSave }: {
+  title: string; desc: string; links: MenuLink[];
+  setLinks: (l: MenuLink[]) => void; onSave: () => void;
+}) {
+  const move = (i: number, d: number) => {
+    const j = i + d;
+    if (j < 0 || j >= links.length) return;
+    const next = [...links];
+    [next[i], next[j]] = [next[j], next[i]];
+    setLinks(next);
+  };
+  const edit = (i: number, patch: Partial<MenuLink>) =>
+    setLinks(links.map((l, k) => (k === i ? { ...l, ...patch } : l)));
+  return (
+    <div className="rounded-3xl bg-white p-6 shadow-sm">
+      <h2 className="text-xl font-black">{title}</h2>
+      <p className="mt-1 text-sm text-neutral-500">{desc}</p>
+      <div className="mt-4 grid gap-2">
+        {links.map((l, i) => (
+          <div key={i} className="flex flex-wrap items-center gap-2 rounded-2xl border p-2 text-sm">
+            <input className={`${input} max-w-52`} value={l.label} onChange={(e) => edit(i, { label: e.target.value })} placeholder="Görünen ad" />
+            <input className={`${input} flex-1`} value={l.href} onChange={(e) => edit(i, { href: e.target.value })} style={{ minWidth: 200 }} placeholder="/sayfa-adresi veya https://…" />
+            <button className={btnGhost} onClick={() => move(i, -1)}>↑</button>
+            <button className={btnGhost} onClick={() => move(i, 1)}>↓</button>
+            <button className={btnGhost} onClick={() => setLinks(links.filter((_, k) => k !== i))}>Sil</button>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex gap-2">
+        <button className={btnGhost} onClick={() => setLinks([...links, { label: "Yeni bağlantı", href: "/" }])}>+ Ekle</button>
+        <button className={btn} onClick={onSave}>Kaydet</button>
+      </div>
     </div>
   );
 }

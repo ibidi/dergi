@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Search, Menu, X } from "lucide-react";
+import { fetchPublicContent } from "@/lib/content";
 
 function InstagramIcon({ size = 14 }: { size?: number }) {
   return (
@@ -51,6 +52,13 @@ export default function Header() {
   // Ana sayfada hero slider'ın üstüne binen transparan dergi kapağı menüsü
   const overlay = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
+  const [nav, setNav] = useState(NAV);
+
+  useEffect(() => {
+    fetchPublicContent().then((d) => {
+      if (d && d.settings.header_menu.length > 0) setNav(d.settings.header_menu);
+    });
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -98,7 +106,7 @@ export default function Header() {
           <span className="text-[11px] font-semibold uppercase tracking-[0.35em] opacity-70">Dergi</span>
         </Link>
         <nav className="hidden md:flex items-center gap-4 xl:gap-6 text-[12px] xl:text-[13px] font-semibold uppercase tracking-[0.14em]">
-          {NAV.map((item) => (
+          {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -152,7 +160,7 @@ export default function Header() {
               className={`w-full text-sm outline-none bg-transparent ${!solid ? "placeholder:text-white/50 text-white" : ""}`}
             />
           </form>
-          {NAV.map((item) => (
+          {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { MapPin, Globe, Mail } from "lucide-react";
+import { MapPin, Globe, Mail, Link as LinkIcon } from "lucide-react";
 import { CATEGORIES } from "@/data/articles";
+import { DEFAULT_SETTINGS, fetchPublicContent, type MenuLink } from "@/lib/content";
 
 function InstagramIcon({ size = 16 }: { size?: number }) {
   return (
@@ -36,15 +38,29 @@ function FacebookIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-const SOCIALS = [
-  { label: "Instagram", href: "https://www.instagram.com/irtibatdergi", Icon: InstagramIcon },
-  { label: "X", href: "https://x.com/irtibatdergi", Icon: XIcon },
-  { label: "TikTok", href: "https://www.tiktok.com/@irtibatdergi", Icon: TikTokIcon },
-  { label: "Facebook", href: "https://www.facebook.com/irtibatdergi", Icon: FacebookIcon },
-];
+const SOCIAL_ICONS: Record<string, (p: { size?: number }) => React.ReactNode> = {
+  Instagram: InstagramIcon,
+  X: XIcon,
+  TikTok: TikTokIcon,
+  Facebook: FacebookIcon,
+  Link: LinkIcon,
+};
 
 export default function Footer() {
   const pathname = usePathname();
+  const [socials, setSocials] = useState<MenuLink[]>(DEFAULT_SETTINGS.socials);
+  const [kurumsal, setKurumsal] = useState<MenuLink[]>(DEFAULT_SETTINGS.footer_menu);
+  const [contact, setContact] = useState(DEFAULT_SETTINGS.contact);
+
+  useEffect(() => {
+    fetchPublicContent().then((d) => {
+      if (!d) return;
+      setSocials(d.settings.socials);
+      setKurumsal(d.settings.footer_menu);
+      setContact(d.settings.contact);
+    });
+  }, []);
+
   if (pathname?.startsWith("/admin")) return null;
   return (
     <footer className="bg-neutral-950 text-neutral-300 mt-16">
@@ -55,11 +71,14 @@ export default function Footer() {
             Moda, sanat, röportaj ve cemiyet hayatının nabzını tutan aylık yaşam rehberi.
           </p>
           <div className="mt-4 flex gap-3">
-            {SOCIALS.map(({ label, href, Icon }) => (
-              <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label} title={`${label} — @irtibatdergi`} className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:bg-brand-500 hover:border-brand-500 hover:text-white transition">
-                <Icon size={16} />
-              </a>
-            ))}
+            {socials.map(({ label, href }) => {
+              const Icon = SOCIAL_ICONS[label] ?? LinkIcon;
+              return (
+                <a key={label} href={href} target="_blank" rel="noreferrer" aria-label={label} title={label} className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center hover:bg-brand-500 hover:border-brand-500 hover:text-white transition">
+                  <Icon size={16} />
+                </a>
+              );
+            })}
           </div>
           <p className="mt-3 text-xs text-neutral-500">@irtibatdergi</p>
         </div>
@@ -76,18 +95,17 @@ export default function Footer() {
         <div>
           <h4 className="text-white text-sm font-bold uppercase tracking-widest mb-4">Kurumsal</h4>
           <ul className="space-y-2 text-sm">
-            {["Ana Sayfa|/", "Hakkımızda|/hakkimizda", "Künye|/kunye", "Eser Gönder|/eser-gonder", "Bu Ayki Önerilerimiz|/oneriler", "İletişim|/iletisim"].map((x) => {
-              const [label, href] = x.split("|");
-              return <li key={label}><Link href={href} className="hover:text-white">{label}</Link></li>;
-            })}
+            {kurumsal.map(({ label, href }) => (
+              <li key={`${label}|${href}`}><Link href={href} className="hover:text-white">{label}</Link></li>
+            ))}
           </ul>
         </div>
         <div>
           <h4 className="text-white text-sm font-bold uppercase tracking-widest mb-4">İletişim</h4>
           <ul className="space-y-3 text-sm text-neutral-400">
-            <li className="flex gap-2"><MapPin size={16} className="shrink-0 mt-0.5" /> Afşin / KAHRAMANMARAŞ</li>
-            <li className="flex gap-2"><Globe size={16} className="shrink-0 mt-0.5" /> www.irtibatdergi.com</li>
-            <li className="flex gap-2"><Mail size={16} className="shrink-0 mt-0.5" /> irtibatdergi@gmail.com</li>
+            <li className="flex gap-2"><MapPin size={16} className="shrink-0 mt-0.5" /> {contact.address}</li>
+            <li className="flex gap-2"><Globe size={16} className="shrink-0 mt-0.5" /> {contact.site}</li>
+            <li className="flex gap-2"><Mail size={16} className="shrink-0 mt-0.5" /> {contact.email}</li>
           </ul>
         </div>
       </div>
