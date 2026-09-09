@@ -1,0 +1,20 @@
+name = "dergi-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dergi-db"
+database_id = "8e625851-ea87-4ee4-b891-f6145d50f9a2"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "dergi-media"
+
+[vars]
+# R2 dosya URL'lerinin ön eki. Örn: https://medya.siteniz.com veya
+# Worker üzerinden sunum için boş bırakın (/api/media/file/:key kullanılır).
+R2_PUBLIC_URL = ""
+# CORS'a izin verilen site adresi. Virgülle birden fazla yazılabilir.
+ALLOWED_ORIGINS = "http://localhost:3000, https://irtibatdergi.com, https://www.irtibatdergi.com"
+JWT_EXPIRES_HOURS = "72"

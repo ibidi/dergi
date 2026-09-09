@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MapPin, Globe, Mail } from "lucide-react";
 import { CATEGORIES } from "@/data/articles";
 
@@ -41,6 +44,8 @@ const SOCIALS = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/admin")) return null;
   return (
     <footer className="bg-neutral-950 text-neutral-300 mt-16">
       <div className="mx-auto max-w-7xl px-4 py-12 grid gap-10 md:grid-cols-4">
