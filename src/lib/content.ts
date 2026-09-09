@@ -15,8 +15,10 @@ export type PublicContent = {
   slider: ArticleDTO[];
 };
 
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
+export const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
+  "https://dergi-api.ihsanbakidogann.workers.dev"
+).replace(/\/$/, "");
 
 export function staticContent(): PublicContent {
   const featured: ArticleDTO[] = ARTICLES.filter((a) => a.featured).map((a) => ({ ...a, status: "published" as const }));
